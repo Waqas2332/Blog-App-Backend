@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 
 import User from "models/user-model.js";
 import { type UserSchema } from "models/user-model.js";
+import { authenticateJWT, generateToken } from "middlewares/jwt.js";
 
 export const register = async (req: Request, res: Response) => {
   const data: UserSchema = await req.body;
@@ -19,9 +20,13 @@ export const register = async (req: Request, res: Response) => {
       ...data,
       password: hashedPassword,
     });
+
+    const { _id, email, password } = user;
+
+    const token = generateToken({ _id, email, password });
     res
       .status(201)
-      .json({ message: "User Created Successfully", ok: true, user });
+      .json({ message: "User Created Successfully", ok: true, token });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Server Error", ok: false });
