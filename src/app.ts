@@ -1,14 +1,16 @@
 import express from "express";
-
-import authRoutes from "./routes/auth-routes.js";
 import mongoose from "mongoose";
 import cors from "cors";
+
+import authRoutes from "./routes/auth-routes.js";
+import blogRoutes from "./routes/blog-routes.js";
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 app.use("/api/auth", authRoutes);
+app.use("/api/blogs", blogRoutes);
 
 const PORT = process.env.PORT || "5000";
 
