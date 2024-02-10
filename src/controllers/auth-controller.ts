@@ -23,7 +23,7 @@ export const register = async (req: Request, res: Response) => {
 
     const { _id, email, password } = user;
 
-    const token = generateToken({ _id, email, password });
+    const token = generateToken({ userId: _id, email, password });
     res
       .status(201)
       .json({ message: "User Created Successfully", ok: true, token });
