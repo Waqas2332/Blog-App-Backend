@@ -9,6 +9,7 @@ export const addBlog = async (req: Request, res: Response) => {
       .status(201)
       .json({ message: "Post Created Successfully", response, ok: true });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: "Server Error", ok: false });
   }
 };
