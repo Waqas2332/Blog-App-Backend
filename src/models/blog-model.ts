@@ -11,12 +11,16 @@ const blogSchema = new mongoose.Schema(
       required: true,
     },
     author: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId || String,
       ref: "Users",
     },
     tags: {
       type: [String],
       required: true,
+    },
+    likes: {
+      type: Number,
+      default: 0,
     },
     category: {
       type: String,

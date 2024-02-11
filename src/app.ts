@@ -14,7 +14,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/blogs", blogRoutes);
 app.use("/api/user-preferences", userPreferencesRoutes);
 
-const PORT = process.env.PORT || "6000";
+const PORT = process.env.PORT || "8000";
 
 app.listen(PORT, () => {
   mongoose
