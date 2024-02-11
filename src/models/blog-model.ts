@@ -32,6 +32,7 @@ const blogSchema = new mongoose.Schema(
         "Music",
         "Sports",
       ],
+      required: true,
     },
   },
   { timestamps: true }
