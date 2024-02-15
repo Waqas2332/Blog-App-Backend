@@ -2,6 +2,7 @@ import { type Request, Response } from "express";
 import Blog, { BlogSchema } from "models/blog-model.js";
 import User from "models/user-model.js";
 import UserPreferences from "models/user-preferences-model.js";
+import mongoose from "mongoose";
 
 export const addBlog = async (req: Request, res: Response) => {
   const data: BlogSchema = req.body;
@@ -21,8 +22,14 @@ export const fetchBlogs = async (req: Request, res: Response) => {
 
   try {
     const blogs = await Blog.find().lean();
+    const filteredBlogs = blogs.filter(
+      (blog) => blog.author.toString() !== user
+    );
+
     for (const blog of blogs) {
-      const author = await User.findById(blog.author).lean();
+      const authorId = new mongoose.Types.ObjectId(blog.author);
+      const author = await User.findById(authorId).lean();
+      // console.log(author);
 
       if (author) {
         blog.author = author.firstName;
@@ -35,9 +42,10 @@ export const fetchBlogs = async (req: Request, res: Response) => {
       const userPreferences = await UserPreferences.findOne({ user: user });
       const { preferences } = userPreferences;
 
-      const preferenceBlogs = blogs.filter((blog) =>
+      const preferenceBlogs = filteredBlogs.filter((blog) =>
         preferences.includes(blog.category)
       );
+
       return res.status(200).json({
         message: "Data fetched",
         ok: true,
@@ -50,7 +58,7 @@ export const fetchBlogs = async (req: Request, res: Response) => {
     return res.status(200).json({
       message: "Data fetched",
       ok: true,
-      blogs,
+      blogs: filteredBlogs,
       preferences: false,
       user,
     });
