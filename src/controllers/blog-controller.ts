@@ -88,3 +88,22 @@ export const fetchBlogs = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Server Error", ok: false });
   }
 };
+
+export const fetchBlog = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(404).json({ message: "Not Found", ok: false });
+  }
+  try {
+    const blog = await Blog.findById(id).lean();
+    const author = await User.findById(blog.author).lean();
+
+    blog.author = author.firstName;
+
+    res
+      .status(200)
+      .json({ message: "Data fetched successfully", blog, ok: true });
+  } catch (error) {
+    console.log(error);
+  }
+};
