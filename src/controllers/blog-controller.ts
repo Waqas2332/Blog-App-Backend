@@ -22,6 +22,24 @@ export const fetchBlogs = async (req: Request, res: Response) => {
 
   try {
     const blogs = await Blog.find().lean();
+
+    if (param?.user) {
+      const userBlogs = blogs.filter(
+        (blog) => blog.author.toString() === req.user.userId
+      );
+
+      for (const blog of userBlogs) {
+        blog.author = "You";
+      }
+
+      return res.status(200).json({
+        message: "Data fetched",
+        ok: true,
+        blogs: userBlogs,
+        user,
+      });
+    }
+
     const filteredBlogs = blogs.filter(
       (blog) => blog.author.toString() !== user
     );
