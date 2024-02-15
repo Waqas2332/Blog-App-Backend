@@ -25,6 +25,13 @@ const blogSchema = new mongoose.Schema(
     likesUser: {
       type: [String],
     },
+    comments: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Comments",
+      },
+    ],
+
     category: {
       type: String,
       enum: [

@@ -1,5 +1,6 @@
 import { type Request, Response } from "express";
 import Blog, { BlogSchema } from "models/blog-model.js";
+import Comment from "models/comment-model.js";
 import User from "models/user-model.js";
 import UserPreferences from "models/user-preferences-model.js";
 import mongoose from "mongoose";
@@ -100,9 +101,21 @@ export const fetchBlog = async (req: Request, res: Response) => {
 
     blog.author = author.firstName;
 
-    res
-      .status(200)
-      .json({ message: "Data fetched successfully", blog, ok: true });
+    const comments = await Comment.find({ blogId: id })
+      .sort({ createdAt: -1 })
+      .lean();
+    console.log(comments);
+
+    const allComments = comments.map((comment) => comment.comment);
+
+    res.status(200).json({
+      message: "Data fetched successfully",
+      blog: {
+        ...blog,
+        comments: allComments,
+      },
+      ok: true,
+    });
   } catch (error) {
     console.log(error);
   }
@@ -126,6 +139,31 @@ export const updateLikes = async (req: Request, res: Response) => {
         .json({ message: "You have already likes the post", ok: false });
     }
   } catch (error) {
+    res.status(500).json({ message: "Server Error", ok: false });
+  }
+};
+
+export const addComment = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { comment } = req.body;
+  console.log("Hello");
+
+  try {
+    const blog = await Blog.findById(id);
+    if (!blog) {
+      return res.status(404).json({ message: "Blog doesn't found", ok: false });
+    }
+    const newComment = await Comment.create({
+      comment,
+      user: req.user.userId,
+      blogId: id,
+    });
+    blog.comments.push(newComment._id);
+    await blog.save();
+
+    res.status(201).json({ message: "Comment Added", ok: true, blog });
+  } catch (error) {
+    console.log(error);
     res.status(500).json({ message: "Server Error", ok: false });
   }
 };
