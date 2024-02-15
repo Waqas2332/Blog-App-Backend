@@ -23,6 +23,7 @@ export const fetchBlogs = async (req: Request, res: Response) => {
   try {
     const blogs = await Blog.find().lean();
 
+    // showing blogs of the user which is logged in
     if (param?.user) {
       const userBlogs = blogs.filter(
         (blog) => blog.author.toString() === req.user.userId
@@ -40,6 +41,7 @@ export const fetchBlogs = async (req: Request, res: Response) => {
       });
     }
 
+    // filtering user's on blogs and showing all other blogs
     const filteredBlogs = blogs.filter(
       (blog) => blog.author.toString() !== user
     );
@@ -56,6 +58,7 @@ export const fetchBlogs = async (req: Request, res: Response) => {
       }
     }
 
+    // showing blogs according to preference
     if (param?.preference) {
       const userPreferences = await UserPreferences.findOne({ user: user });
       const { preferences } = userPreferences;
