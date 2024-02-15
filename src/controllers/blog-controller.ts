@@ -107,3 +107,25 @@ export const fetchBlog = async (req: Request, res: Response) => {
     console.log(error);
   }
 };
+
+export const updateLikes = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  try {
+    const blog = await Blog.findById(id);
+    if (!blog) {
+      return res.status(404).json({ message: "Blog Not Found", ok: false });
+    }
+    if (!blog.likesUser.includes(req.user.userId)) {
+      blog.likesUser.push(req.user.userId);
+      blog.likes++;
+      await blog.save();
+      return res.status(200).json({ message: "Post Liked", ok: true });
+    } else {
+      return res
+        .status(400)
+        .json({ message: "You have already likes the post", ok: false });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", ok: false });
+  }
+};

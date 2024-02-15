@@ -22,6 +22,9 @@ const blogSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    likesUser: {
+      type: [String],
+    },
     category: {
       type: String,
       enum: [
