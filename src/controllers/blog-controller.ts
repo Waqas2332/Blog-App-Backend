@@ -4,6 +4,8 @@ import Comment from "models/comment-model.js";
 import User from "models/user-model.js";
 import UserPreferences from "models/user-preferences-model.js";
 import mongoose from "mongoose";
+import { UserSchema } from "models/user-model.js";
+import { CommentSchemaType } from "models/comment-model.js";
 
 export const addBlog = async (req: Request, res: Response) => {
   const data: BlogSchema = req.body;
@@ -92,32 +94,52 @@ export const fetchBlogs = async (req: Request, res: Response) => {
 
 export const fetchBlog = async (req: Request, res: Response) => {
   const { id } = req.params;
+
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return res.status(404).json({ message: "Not Found", ok: false });
   }
+
   try {
     const blog = await Blog.findById(id).lean();
     const author = await User.findById(blog.author).lean();
-
     blog.author = author.firstName;
 
     const comments = await Comment.find({ blogId: id })
       .sort({ createdAt: -1 })
+      .populate("user")
       .lean();
     console.log(comments);
 
-    const allComments = comments.map((comment) => comment.comment);
+    const commentsWithUserDetails = comments.map((comment: any) => {
+      const userDetails: UserSchema | null = comment.user
+        ? {
+            firstName: comment.user.firstName,
+            lastName: comment.user.lastName,
+            email: comment.user.email,
+            password: comment.user.password,
+          }
+        : null;
+
+      return {
+        text: comment.comment,
+        createdAt: comment.createdAt,
+        author: {
+          firstName: userDetails.firstName,
+        },
+      };
+    });
 
     res.status(200).json({
       message: "Data fetched successfully",
       blog: {
         ...blog,
-        comments: allComments,
+        comments: commentsWithUserDetails,
       },
       ok: true,
     });
   } catch (error) {
     console.log(error);
+    res.status(500).json({ message: "Server Error", ok: false });
   }
 };
 
